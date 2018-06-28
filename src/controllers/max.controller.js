@@ -42,9 +42,10 @@ exports.data_update = (req, res) => {
         {fb_id: req.params.fb_id},
         (err, doc) => {
             const dict = [obj1(req), obj2(doc)].reduce(
-                (r, o) => {
-                    Object.keys(o).forEach(k => r[k] = o[k])
-                    return r
+                (new_dict, old_dict) => {
+                    Object.keys(old_dict).forEach(k => new_dict[k] = old_dict[k])
+                    Object.keys(new_dict).forEach(k => new_dict[k] = obj1(req)[k])
+                    return new_dict
                 }
             , {})
             return err || isEmpty(doc || {}) == true ?
