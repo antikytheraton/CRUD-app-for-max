@@ -18,7 +18,7 @@ exports.data_create = (req, res) => {
 exports.data_details = (req, res) => {
     Max.findOne(
         {fb_id: req.params.fb_id},
-        (err, data) => err ? res.sendStatus(400) : res.send(data)
+        (err, data) => err ? res.sendStatus(400) : res.send(data.data)
     )
 }
 
