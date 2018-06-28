@@ -22,14 +22,6 @@ exports.data_details = (req, res) => {
     )
 }
 
-// exports.data_update = (req, res) => {
-//     Max.findOneAndUpdate(
-//         {fb_id: req.params.fb_id},
-//         {$set: { data: req.body }},
-//         (err, data) =>  err ? res.sendStatus(400) : res.send('Data updated')
-//     )
-// }
-
 exports.data_delete = (req, res) => {
     Max.findOneAndDelete(
         {fb_id: req.params.fb_id},
