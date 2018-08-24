@@ -15,12 +15,29 @@ exports.data_create = (req, res) => {
     data.save(err => err ? res.sendStatus(400) : res.send(`Product created successfully`))
 }
 
+// exports.data_details = (req, res) => {
+//     Max.findOne(
+//         {fb_id: req.params.fb_id},
+//         (err, data) => err ? res.sendStatus(400) : res.send(data)
+//     )
+// }
+
+
 exports.data_details = (req, res) => {
     Max.findOne(
         {fb_id: req.params.fb_id},
-        (err, data) => err ? res.sendStatus(400) : res.send(data)
+        (err, data) => {
+            if (err) {console.log(err)}
+            if (data) {
+                res.send(data)
+            } else {
+                const extras = new Max({'fb_id': req.params.fb_id, 'data': {'state': 0}})
+                extras.save(err2 => err2 ? console.log(err2) : res.send(extras))
+            }
+        }
     )
 }
+
 
 exports.data_delete = (req, res) => {
     Max.findOneAndDelete(
@@ -55,7 +72,7 @@ const save_again = (res, dict, fb_id) => {
             'data': dict
         }
     )
-    console.log(data)
+    // console.log(data)
     data.save(err => err ? res.sendStatus(400) : res.send(data))
 }
 
