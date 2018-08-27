@@ -1,5 +1,6 @@
 'use strict'
 const Max = require('../models/max.models')
+const mongoose = require('mongoose')
 
 exports.test = (req, res) => {
     res.send(`Greetings from the Test controller!`)
@@ -14,14 +15,6 @@ exports.data_create = (req, res) => {
     )
     data.save(err => err ? res.sendStatus(400) : res.send(`Product created successfully`))
 }
-
-// exports.data_details = (req, res) => {
-//     Max.findOne(
-//         {fb_id: req.params.fb_id},
-//         (err, data) => err ? res.sendStatus(400) : res.send(data)
-//     )
-// }
-
 
 exports.data_details = (req, res) => {
     Max.findOne(
@@ -38,31 +31,21 @@ exports.data_details = (req, res) => {
     )
 }
 
+exports.data_update = (req, res) => {
+    Max.findOneAndRemove(
+        {fb_id: req.params.fb_id}
+    ).lean().exec((err, doc) => {
+        if (err) { res.sendStatus(400) }
+        const mergedData = mergeDataJSON(findedDocument(doc), req.body)
+        save_again(res, mergedData, req.params.fb_id)
+    })
+}
 
 exports.data_delete = (req, res) => {
     Max.findOneAndDelete(
         {fb_id: req.params.fb_id},
         err => err ? res.sendStatus(400) : res.status(204).send(`Deleted successfully!`)
     )
-}
-
-exports.data_update = (req, res) => {
-    const dataToUpdate = Max.findOneAndRemove(
-        {fb_id: req.params.fb_id},
-        (err, doc) => {
-            const dict = [obj1(req), obj2(doc)].reduce(
-                (new_dict, old_dict) => {
-                    Object.keys(old_dict).forEach(k => new_dict[k] = old_dict[k])
-                    Object.keys(new_dict).forEach(k => new_dict[k] = obj1(req)[k])
-                    return new_dict
-                }
-            , {})
-            return err || isEmpty(doc || {}) == true ?
-            res.sendStatus(400) :
-            save_again(res, dict, req.params.fb_id)
-        }
-    )
-    dataToUpdate
 }
 
 const save_again = (res, dict, fb_id) => {
@@ -72,12 +55,14 @@ const save_again = (res, dict, fb_id) => {
             'data': dict
         }
     )
-    // console.log(data)
     data.save(err => err ? res.sendStatus(400) : res.send(data))
 }
 
-const obj1 = (req) => req.body || {}
-
-const obj2 = (doc) => isEmpty(doc || {}) ? {} : doc._doc.data
-
 const isEmpty = (obj) => Object.keys(obj).length === 0
+
+const mergeDataJSON = (saved_data, new_data) => {
+    const data = Object.assign({}, saved_data, new_data)
+    return data
+}
+
+const findedDocument = (doc) => isEmpty(doc || {}) ? {} : doc.data
